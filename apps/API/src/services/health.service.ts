@@ -1,8 +1,8 @@
-import type { HealthResponseDto } from '@meeverse/shared-contracts';
+import type { HealthResponseDto, NodeEnvironment } from '@meeverse/shared-contracts';
 
 interface BuildHealthResponseParams {
     uptime: number;
-    environment: string;
+    environment: NodeEnvironment;
     now: Date;
 }
 
