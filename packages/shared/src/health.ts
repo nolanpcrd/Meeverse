@@ -1,6 +1,6 @@
 export type HealthStatus = 'ok';
 
-export type NodeEnvironment = 'development' | 'test' | 'production' | string;
+export type NodeEnvironment = 'development' | 'test' | 'production';
 
 export interface HealthResponseDto {
     status: HealthStatus;

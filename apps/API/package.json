@@ -13,8 +13,9 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@meeverse/shared-contracts": "file:../../packages/shared",
+    "@fastify/cors": "^11.2.0",
     "@fastify/sensible": "^6.0.4",
+    "@meeverse/shared-contracts": "file:../../packages/shared",
     "fastify": "^5.8.4"
   },
   "devDependencies": {
