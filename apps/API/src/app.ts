@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import sensible from '@fastify/sensible';
+import cors from '@fastify/cors';
 import healthRoute from './routes/health.js';
 
 export function buildApp() {
@@ -8,6 +9,7 @@ export function buildApp() {
     });
 
     app.register(sensible);
+    app.register(cors);
 
     app.register(healthRoute, { prefix: '/api' });
 
