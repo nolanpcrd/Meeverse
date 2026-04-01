@@ -1,2 +1,7 @@
 /.idea/
 /apps/API/src/generated/
+/packages/shared/node_modules/
+/apps/Meeverse/package-lock.json
+/docs/package-lock.json
+/packages/shared/package-lock.json
+/apps/API/dist
