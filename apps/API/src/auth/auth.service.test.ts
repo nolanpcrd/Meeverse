@@ -233,4 +233,107 @@ describe('AuthService', () => {
             });
         });
     });
+
+    // tests create OAuth user
+    describe('createOAuthUser', () => {
+        const oauthInput = {
+            provider: 'google',
+            providerAccountId: 'google-456',
+            email: 'oauth@example.com',
+            username: 'oauthuser',
+            displayName: 'OAuth User',
+            avatarUrl: 'https://example.com/avatar.png',
+            accessToken: 'access_token_123',
+            refreshToken: 'refresh_token_456',
+        };
+
+        it('should create new user with OAuth data when email does not exist', async () => {
+            vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
+            vi.mocked(prisma.user.create).mockResolvedValue(createMockUser({
+                id: 'oauth-user-123',
+                email: oauthInput.email,
+                username: oauthInput.username,
+                displayName: oauthInput.displayName,
+                avatarUrl: oauthInput.avatarUrl,
+            }));
+
+            const result = await authService.createOAuthUser(oauthInput);
+
+            expect(result.email).toBe(oauthInput.email);
+            expect(result.username).toBe(oauthInput.username);
+            expect(prisma.user.create).toHaveBeenCalledWith({
+                data: {
+                    email: oauthInput.email,
+                    username: oauthInput.username,
+                    displayName: oauthInput.displayName,
+                    avatarUrl: oauthInput.avatarUrl,
+                    accounts: {
+                        create: {
+                            provider: oauthInput.provider,
+                            providerAccountId: oauthInput.providerAccountId,
+                            accessToken: oauthInput.accessToken,
+                            refreshToken: oauthInput.refreshToken,
+                        },
+                    },
+                },
+            });
+        });
+
+        it('should link OAuth account to existing user when email already exists', async () => {
+            const existingUser = createMockUser({
+                id: 'existing-user-123',
+                email: oauthInput.email,
+                username: 'existing',
+            });
+
+            vi.mocked(prisma.user.findUnique).mockResolvedValue(existingUser);
+            vi.mocked(prisma.account.create).mockResolvedValue({
+                id: 'acc-existing',
+                userId: existingUser.id,
+                provider: oauthInput.provider,
+                providerAccountId: oauthInput.providerAccountId,
+                accessToken: oauthInput.accessToken,
+                refreshToken: oauthInput.refreshToken,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            });
+
+            const result = await authService.createOAuthUser(oauthInput);
+
+            expect(result.id).toBe(existingUser.id);
+            expect(result.email).toBe(existingUser.email);
+            expect(prisma.account.create).toHaveBeenCalledWith({
+                data: {
+                    userId: existingUser.id,
+                    provider: oauthInput.provider,
+                    providerAccountId: oauthInput.providerAccountId,
+                    accessToken: oauthInput.accessToken,
+                    refreshToken: oauthInput.refreshToken,
+                },
+            });
+            expect(prisma.user.create).not.toHaveBeenCalled();
+        });
+    });
+
+    // tests find user by id
+    describe('findUserById', () => {
+        it('should return user when found', async () => {
+            const mockUser = createMockUser({ id: 'user-456' });
+
+            vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser);
+
+            const result = await authService.findUserById('user-456');
+
+            expect(result).toEqual(mockUser);
+            expect(prisma.user.findUnique).toHaveBeenCalledWith({ where: { id: 'user-456' } });
+        });
+
+        it('should return null when user not found', async () => {
+            vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
+
+            const result = await authService.findUserById('nonexistent-id');
+
+            expect(result).toBeNull();
+        });
+    });
 });
