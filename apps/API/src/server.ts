@@ -1,6 +1,9 @@
 import { buildApp } from './app';
 import config from './config';
 
+/**
+ * Starts the server
+ */
 const start = async () => {
     const app = buildApp();
 
