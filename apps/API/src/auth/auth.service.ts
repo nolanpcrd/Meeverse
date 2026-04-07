@@ -1,27 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { prisma } from '../lib/prisma.js';
-
-/**
- * Register input schema
- */
-export interface RegisterInput {
-    email: string;
-    password: string;
-    username: string;
-    displayName: string;
-}
-
-/**
- * OAuth User schema
- */
-export interface OAuthUser {
-    email: string;
-    username: string;
-    displayName: string;
-    avatarUrl?: string | null;
-    provider: string;
-    providerAccountId: string;
-}
+import type { CreateUserInput } from '@meeverse/shared-contracts';
 
 /**
  * Authentication service
@@ -29,10 +8,10 @@ export interface OAuthUser {
 export class AuthService {
     /**
      * Register method
-     * @param input the user's input (should be a register input)
+     * @param input the user's input (should be a CreateUserInput)
      * @returns the user's id, username and email
      */
-    async register(input: RegisterInput) {
+    async register(input: CreateUserInput) {
         const existingUser = await prisma.user.findFirst({
             where: {
                 OR: [{ email: input.email }, { username: input.username }],
@@ -46,7 +25,7 @@ export class AuthService {
             throw new Error('Username already taken');
         }
 
-        const hashedPassword = await bcrypt.hash(input.password, 12);
+        const hashedPassword = input.password ? await bcrypt.hash(input.password, 12) : null;
 
         const user = await prisma.user.create({
             data: {

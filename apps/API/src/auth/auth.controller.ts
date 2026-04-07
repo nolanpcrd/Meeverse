@@ -1,5 +1,6 @@
 import type { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify';
-import { authService, RegisterInput } from './auth.service.js';
+import { authService } from './auth.service.js';
+import type { LoginRequestDto, RegisterRequestDto } from '@meeverse/shared-contracts';
 
 /**
  * Authentication controller
@@ -7,11 +8,11 @@ import { authService, RegisterInput } from './auth.service.js';
 export class AuthController {
     /**
      * Register method
-     * @param request the fastify request from the user (should contain a register input)
+     * @param request the fastify request from the user (should contain a RegisterRequestDto)
      * @param reply the reply to send
      * @returns the reply containing the user and the auth token (or an error)
      */
-    async register(request: FastifyRequest<{ Body: RegisterInput }>, reply: FastifyReply) {
+    async register(request: FastifyRequest<{ Body: RegisterRequestDto }>, reply: FastifyReply) {
         try {
             const user = await authService.register(request.body);
             const token = reply.jwtSign({ userId: user.id, email: user.email });
@@ -24,11 +25,11 @@ export class AuthController {
 
     /**
      * Login method
-     * @param request the fastify request from the user (should contain an email + pwd)
+     * @param request the fastify request from the user (should contain a LoginRequestDto)
      * @param reply the reply to send
      * @returns the reply containing the user and the auth token (or an error)
      */
-    async login(request: FastifyRequest<{ Body: { email: string; password: string } }>, reply: FastifyReply) {
+    async login(request: FastifyRequest<{ Body: LoginRequestDto }>, reply: FastifyReply) {
         try {
             const { email, password } = request.body;
 
